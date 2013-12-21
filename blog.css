@@ -1,0 +1,18 @@
+/* css file for clblog.lisp */
+
+body {
+    background-color:#efece3;
+    width:50%;
+    margin:auto;
+}
+
+.header {
+    color:#121212;
+}
+
+.forms {
+    width:50%;
+    margin:auto;
+}
+    
+
