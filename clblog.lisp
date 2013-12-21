@@ -51,6 +51,20 @@
   "return the stored blogposts"
   (nreverse (get-instances-by-range 'persistent-post 'id nil nil)))
 
+(defun newpost-page ()
+  "html for /newpost page"
+  (page-template (:title "New Posts")
+    (with-html
+      (:h3 :class "header" "Fill in Title and your blogpost to submit a new post")
+      (:div "forms"
+	    (:form :method :post :action "/index"
+		   (:div :class "titletext"
+			 (:submit :type "text" :name "titletext"))
+		   (:div :class "bodytext"
+			 (:textarea :name "bodytext"))
+		   (:div :class "submitbutton"
+			 (:submit :type "submit" :value "Submit")))))))
+
 
 
 
