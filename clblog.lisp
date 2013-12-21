@@ -31,8 +31,9 @@
 (defvar *id-counter* 0)
 
 (defun get-id ()
-  "return increased by one id-counter"
-  (incf *id-counter*))
+  "return a single integer for the current time
+   in a universal time format."
+  (get-universal-time))
 
 
 (defparameter *store* (open-store '(:clsql (:sqlite3 "blog.db"))))
