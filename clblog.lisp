@@ -19,6 +19,11 @@
      ,@body))
 
 
+;; tell Hunchentoot which css file to use.
+(push (create-static-file-dispatcher-and-handler
+       "/blog.css" "blog.css") *dispatch-table*)
+
+
 (defmacro page-template ((&key title) &body body)
   "as all the blog pages use the same css files
    use a template to for the page-headers."
@@ -26,6 +31,7 @@
        (:html
 	(:head
 	 (:title ,title)
+	 (:link :type "text/css" :rel "stylesheet" :href "/blog.css")
 	 (:script :src "http://code.jquery.com/jquery-latest.min.js"))
 	(:body ,@body))))
 
@@ -51,19 +57,29 @@
   "return the stored blogposts"
   (nreverse (get-instances-by-range 'persistent-post 'id nil nil)))
 
-(defun newpost-page ()
+(defun newpost-page (title body)
   "html for /newpost page"
   (page-template (:title "New Posts")
     (with-html
       (:h3 :class "header" "Fill in Title and your blogpost to submit a new post")
-      (:div "forms"
+      (:div :class "forms"
 	    (:form :method :post :action "/index"
 		   (:div :class "titletext"
-			 (:submit :type "text" :name "titletext"))
+			 (:input :type "text" :name title))
 		   (:div :class "bodytext"
-			 (:textarea :name "bodytext"))
+			 (:textarea :name body))
 		   (:div :class "submitbutton"
-			 (:submit :type "submit" :value "Submit")))))))
+			 (:input :type "submit"   :value "Submit")))))))
+
+(define-easy-handler (newpost :uri "/newpost")
+    ((title) (body))
+  (newpost-page "" ""))
+
+(defvar *web-server* (make-instance 'easy-acceptor :port 4242))
+
+
+
+
 
 
 
