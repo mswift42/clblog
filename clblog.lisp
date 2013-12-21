@@ -1,7 +1,7 @@
-(ql:quickload '(:hunchentoot :cl-who :elephant))
+(ql:quickload '(:hunchentoot :cl-who :elephant :parenscript))
 
 (defpackage #:clblog
-  (:use :cl :hunchentoot :cl-who :elephant))
+  (:use :cl :hunchentoot :cl-who :elephant :parenscript))
 
 (in-package #:clblog)
 
@@ -18,9 +18,6 @@
   `(with-html-output-to-string (*standard-output* nil)
      ,@body))
 
-;; establish a db to store 
-(defparameter *posts-db*
-  (open-store '(:clsql (:sqlite3 "clblog.db"))))
 
 (defmacro page-template ((&key title) &body body)
   "as all the blog pages use the same css files
@@ -30,6 +27,28 @@
 	(:head
 	 (:title ,title))
 	(:body ,@body))))
+
+(defvar *id-counter* 0)
+
+(defun get-id ()
+  "return increased by one id-counter"
+  (incf *id-counter*))
+
+
+(defparameter *store* (open-store '(:clsql (:sqlite3 "blog.db"))))
+
+
+(defpclass persistent-post ()
+  ((title :reader title :initarg :title :index t)
+   (body :reader body :initarg :body :index t)
+   (id :reader id :initarg :id :initform (get-id) :index t))
+  (:documentation "each blogpost with id, title and body
+        is an instance of the Elephant persistent class"))
+
+(defun blogposts ()
+  "return the stored blogposts"
+  (nreverse (get-instances-by-range 'persistent-post 'id nil nil)))
+
 
 
 
