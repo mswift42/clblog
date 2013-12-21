@@ -19,9 +19,11 @@
      ,@body))
 
 
-;; tell Hunchentoot which css file to use.
+;; tell Hunchentoot which css and js file to use.
 (push (create-static-file-dispatcher-and-handler
        "/blog.css" "blog.css") *dispatch-table*)
+(push (create-static-file-dispatcher-and-handler
+       "/jquery.js" "jquery-2.0.3.min.js") *dispatch-table*)
 
 
 (defmacro page-template ((&key title) &body body)
@@ -32,7 +34,7 @@
 	(:head
 	 (:title ,title)
 	 (:link :type "text/css" :rel "stylesheet" :href "/blog.css")
-	 (:script :src "http://code.jquery.com/jquery-latest.min.js"))
+	 (:script :src "/jquery.js"))
 	(:body ,@body))))
 
 (defvar *id-counter* 0)
@@ -76,6 +78,15 @@
   (newpost-page "" ""))
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
+
+(defparameter *index*
+  (with-html
+    (page-template (:title "Index")
+      (:h3 :class "header" "Watch your posts"))))
+
+(define-easy-handler (index :uri "/index")
+    ()
+  *index*)
 
 
 
