@@ -75,7 +75,8 @@
 		     (:div :class "bodytext"
 			   (:textarea :name "body"))
 		     (:div :class "submitbutton"
-			   (:input :type "submit"   :value "Submit")))))))
+			   (:input :type "submit"   :value "Submit"))))))
+)
 
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body"
@@ -87,7 +88,9 @@
 
 (define-easy-handler (newpost :uri "/newpost")
     ()
-  (newpost-page) )
+  (newpost-page)
+; (add-blog-post (parameter title) (parameter body))
+  )
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
@@ -101,10 +104,18 @@
     ()
   *index*
   (with-html-string
-    (:p (fmt "~{~A ~}" (post-parameters*)))))
+    (display-bloglist (blogposts))))
 
 
-
+(defun display-bloglist (list)
+  "iterate through list of stored blogpost instances and 
+   display them."
+  (with-html-string
+    (dolist (i list)
+      (htm
+       (:p (str (title i)))
+       (:p (str (body i)))
+       (:p (str (id i)))))))
 
 
 
