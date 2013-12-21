@@ -25,7 +25,8 @@
   `(with-html-string
        (:html
 	(:head
-	 (:title ,title))
+	 (:title ,title)
+	 (:script :src "http://code.jquery.com/jquery-latest.min.js"))
 	(:body ,@body))))
 
 (defvar *id-counter* 0)
