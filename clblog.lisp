@@ -11,11 +11,11 @@
 ;; two macros to spare myself of repeating *standard-output* nil all
 ;; the time.
 (defmacro with-html (&body body)
-    `(with-html-output (*standard-output* nil)
+    `(with-html-output (*standard-output* nil :prologue t :indent t)
        ,@body))
 
 (defmacro with-html-string (&body body)
-  `(with-html-output-to-string (*standard-output* nil)
+  `(with-html-output-to-string (*standard-output* nil :prologue t :indent t)
      ,@body))
 
 
@@ -41,7 +41,7 @@
 
 (defun get-id ()
   "return a single integer for the current time
-   in a universal time format."
+   in universal time format."
   (get-universal-time))
 
 
@@ -59,23 +59,28 @@
   "return the stored blogposts"
   (nreverse (get-instances-by-range 'persistent-post 'id nil nil)))
 
-(defun newpost-page (title body)
-  "html for /newpost page"
-  (page-template (:title "New Posts")
-    (with-html
-      (:h3 :class "header" "Fill in Title and your blogpost to submit a new post")
-      (:div :class "forms"
-	    (:form :method :post :action "/index"
-		   (:div :class "titletext"
-			 (:input :type "text" :name title))
-		   (:div :class "bodytext"
-			 (:textarea :name body))
-		   (:div :class "submitbutton"
-			 (:input :type "submit"   :value "Submit")))))))
+(defun newpost-page ()
+    (page-template (:title "New Posts")
+      (with-html
+	(:h3 :class "header" "Fill in Title and your blogpost to submit a new post")
+	(:div :class "forms"
+	      (:form :method :post :onsubmit (ps-inline
+					      (when (or
+						     (= title.value "")
+						     (= body.value ""))
+						(alert "you need body and title")))
+		     :action "/index"
+		     (:div :class "titletext"
+			   (:input :type "text" :name "title"))
+		     (:div :class "bodytext"
+			   (:textarea :name "body"))
+		     (:div :class "submitbutton"
+			   (:input :type "submit"   :value "Submit"))
+		     )))))
 
 (define-easy-handler (newpost :uri "/newpost")
-    ((title) (body))
-  (newpost-page "" ""))
+    ()
+  (newpost-page) )
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
