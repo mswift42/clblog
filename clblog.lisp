@@ -61,7 +61,7 @@
 
 (defun newpost-page ()
     (page-template (:title "New Posts")
-      (with-html
+      (htm
 	(:h3 :class "header" "Fill in Title and your blogpost to submit a new post")
 	(:div :class "forms"
 	      (:form :method :post :onsubmit (ps-inline
@@ -75,8 +75,15 @@
 		     (:div :class "bodytext"
 			   (:textarea :name "body"))
 		     (:div :class "submitbutton"
-			   (:input :type "submit"   :value "Submit"))
-		     )))))
+			   (:input :type "submit"   :value "Submit")))))))
+
+(defun add-blog-post (title body)
+  "add a new blogpost to db with title and body"
+  (let ((trimmed-title (string-trim " " title))
+	(trimemed-body (string-trim " " body)))
+    (with-transaction ()
+	(make-instance 'persistent-post :title trimmed-title
+		       :body trimemed-body))))
 
 (define-easy-handler (newpost :uri "/newpost")
     ()
@@ -87,11 +94,15 @@
 (defparameter *index*
   (with-html
     (page-template (:title "Index")
-      (:h3 :class "header" "Watch your posts"))))
+      (:h3 :class "header" "Watch your posts")
+      )))
 
 (define-easy-handler (index :uri "/index")
     ()
-  *index*)
+  *index*
+  (with-html-string
+    (:p (fmt "~{~A ~}" (post-parameters*)))))
+
 
 
 
