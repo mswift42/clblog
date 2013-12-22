@@ -87,10 +87,14 @@
 		       :body trimemed-body))))
 
 (define-easy-handler (newpost :uri "/newpost")
-    ()
+    ((title) (body))
   (newpost-page)
-; (add-blog-post (parameter title) (parameter body))
-  )
+  (add-blog-post (format nil (parameter title)) (format nil (parameter body)))
+  ;; (let ((title ( post-parameter "title"))
+  ;; 	(body (post-parameter "body")))
+  ;;   (add-blog-post title body)
+;    (redirect "/index")
+    )
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
@@ -98,13 +102,11 @@
   (with-html
     (page-template (:title "Index")
       (:h3 :class "header" "Watch your posts")
-      )))
+      (display-bloglist (blogposts)))))
 
 (define-easy-handler (index :uri "/index")
     ()
-  *index*
-  (with-html-string
-    (display-bloglist (blogposts))))
+  *index*)
 
 
 (defun display-bloglist (list)
