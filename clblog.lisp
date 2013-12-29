@@ -33,6 +33,7 @@
        (:html
 	(:head
 	 (:title ,title)
+	 (:link :type "text/css" :rel "stylesheet" :href "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css")
 	 (:link :type "text/css" :rel "stylesheet" :href "/blog.css")
 	 (:script :src "/jquery.js"))
 	(:body ,@body))))
@@ -86,9 +87,10 @@
 		       :body trimemed-body))))
 
 (define-easy-handler (newpost :uri "/newpost")
-    ((title) (body))
+    ()
   (newpost-page)
-  (add-blog-post (format nil (parameter title)) (format nil (parameter body))))
+  (with-html-string
+    (:p "Done.")))
 
 (defun display-bloglist (list)
   "iterate through list of stored blogpost instances and 
