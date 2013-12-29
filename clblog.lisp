@@ -64,19 +64,22 @@
     (page-template (:title "New Posts")
       (htm
 	(:h3 :class "header" "Fill in Title and your blogpost to submit a new post")
-	(:div :class "forms"
+	(:div :class "form-group"
 	      (:form :method :post :onsubmit (ps-inline
 					      (when (or
 						     (= title.value "")
 						     (= body.value ""))
 						(alert "you need body and title")))
-		     :action "/index"
-		     (:div :class "titletext"
-			   (:input :type "text" :name "title"))
-		     (:div :class "bodytext"
-			   (:textarea :name "body"))
-		     (:div :class "submitbutton"
-			   (:input :type "submit"   :value "Submit")))))))
+		   ;  :action "/index"
+		     (:div :class "form-group"
+			   (:input :type "text" :name "title"
+				   :class "form-control" :label "Title"))
+		     (:div :class "form-group"
+			   (:textarea :name "body" :class "form-control"
+				      :label "Content" :rows "20"))
+		     (:div :class "form-group"
+			   (:input :type "submit"   :value "Submit"
+				   :class "btn btn-default")))))))
 
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body"
@@ -88,9 +91,7 @@
 
 (define-easy-handler (newpost :uri "/newpost")
     ()
-  (newpost-page)
-  (with-html-string
-    (:p "Done.")))
+  (newpost-page))
 
 (defun display-bloglist (list)
   "iterate through list of stored blogpost instances and 
