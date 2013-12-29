@@ -109,7 +109,7 @@
   (with-html
     (page-template (:title "Index")
       (:h3 :class "header" "Watch your posts")
-      (display-bloglist (blogposts)))))
+      (str (display-bloglist (blogposts))))))
 
 (define-easy-handler (index :uri "/index")
     ()
