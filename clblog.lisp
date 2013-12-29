@@ -63,7 +63,7 @@
 (defun newpost-page ()
     (page-template (:title "New Posts")
       (htm
-	(:h3 :class "header" "Fill in Title and your blogpost to submit a new post")
+	(:h3 :class "header" "New Posts")
 	(:div :class "form-group"
 	      (:form :method :post :onsubmit (ps-inline
 					      (when (or
@@ -71,10 +71,10 @@
 						     (= body.value ""))
 						(alert "you need body and title")))
 		   ;  :action "/index"
-		     (:div :class "form-group"
+		     (:div :class "form-group" "Title"
 			   (:input :type "text" :name "title"
 				   :class "form-control" :label "Title"))
-		     (:div :class "form-group"
+		     (:div :class "form-group" "Blog Content"
 			   (:textarea :name "body" :class "form-control"
 				      :label "Content" :rows "20"))
 		     (:div :class "form-group"
