@@ -63,14 +63,22 @@
 (defun newpost-page ()
     (page-template (:title "New Posts")
       (htm
+       	(:nav :class "navbar navbar-inverse" :role "navigation"
+	      (:div :class "navbar-header"
+		    (:a :class "navbar-brand" :href "/index" "Index")
+		    (:a :class "navbar-brand" :href "/about" "About")))
 	(:h3 :class "header" "New Posts")
 	(:div :class "form-group"
 	      (:form :method :post :onsubmit (ps-inline
-					      (when (or
+					      (if (or
 						     (= title.value "")
 						     (= body.value ""))
-						(alert "you need body and title")))
-		   ;  :action "/index"
+						(alert "you need body and title")
+						(lisp (add-blog-post
+						       (post-parameter "title")
+						       (post-parameter "body")))))
+                     :action "/index"
+		     
 		     (:div :class "form-group" "Title"
 			   (:input :type "text" :name "title"
 				   :class "form-control" :label "Title"))
@@ -112,7 +120,8 @@
       (str (display-bloglist (blogposts))))))
 
 (define-easy-handler (index :uri "/index")
-    ()
+    ((title) (body))
+  (add-blog-post title body)
   *index*)
 
 
