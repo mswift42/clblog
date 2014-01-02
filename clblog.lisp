@@ -33,7 +33,8 @@
        (:html
 	(:head
 	 (:title ,title)
-	 (:link :type "text/css" :rel "stylesheet" :href "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css")
+	 (:link :type "text/css" :rel "stylesheet"
+                :href "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css")
 	 (:link :type "text/css" :rel "stylesheet" :href "/blog.css")
 	 (:script :src "/jquery.js"))
 	(:body ,@body))))
@@ -47,7 +48,6 @@
 
 
 (defparameter *store* (open-store '(:clsql (:sqlite3 "blog.db"))))
-
 
 (defpclass persistent-post ()
   ((title :reader title :initarg :title :index t)
@@ -78,7 +78,6 @@
 						       (post-parameter "title")
 						       (post-parameter "body")))))
                      :action "/index"
-		     
 		     (:div :class "form-group" "Title"
 			   (:input :type "text" :name "title"
 				   :class "form-control" :label "Title"))
@@ -105,11 +104,20 @@
   "iterate through list of stored blogpost instances and 
    display them."
   (with-html-string
-    (dolist (i list)
-      (htm
-       (:p (str (title i)))
-       (:p (str (body i)))
-       (:p (str (id i)))))))
+    (:thead
+     (:tr
+      (:th "#")
+      (:th "Title")
+      (:th "Blog Content")
+      (:th "Id")))
+    (:tbody
+     (loop for i in list and count from 1 do
+       (htm
+        (:tr
+         (:th (str count))
+         (:th (str (title i)))
+         (:th (str (body i)))
+         (:th (str (id i)))))))))
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
@@ -117,7 +125,8 @@
   (with-html
     (page-template (:title "Index")
       (:h3 :class "header" "Watch your posts")
-      (str (display-bloglist (blogposts))))))
+      (:table :class "table table-striped"
+              (str (display-bloglist (blogposts)))))))
 
 (define-easy-handler (index :uri "/index")
     ((title) (body))
