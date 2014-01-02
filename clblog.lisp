@@ -121,17 +121,30 @@
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
+(defun navbar (links)
+  "return a bootstrap navbar for all links in 'links'"
+  (with-html
+    (:nav :class "navbar navbar-inverse" :role "navigation"
+          (:div :class "navbar-header"
+                (dolist (i links)
+                  (htm
+                   (:a :class "navbar-brand" :href (first i)
+                       (str (second i)))))))))
+
 (defparameter *index*
   (with-html
     (page-template (:title "Index")
+      (navbar '(("/newpost" "Write a new post")
+                ("/about" "About")))
       (:h3 :class "header" "Watch your posts")
       (:table :class "table table-striped"
               (str (display-bloglist (blogposts)))))))
 
 (define-easy-handler (index :uri "/index")
     ((title) (body))
-  (add-blog-post title body)
-  *index*)
+  (when (and title body)
+    (add-blog-post title body)) ;; only save blog-post if title 
+  *index*)                                         ;; and body are non-nil
 
 
 
