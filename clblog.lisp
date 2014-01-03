@@ -88,10 +88,12 @@
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body"
   (let ((trimmed-title (string-trim " " title))
-	(trimemed-body (string-trim " " body)))
-    (with-transaction ()
+	(trimmed-body (string-trim " " body)))
+    (unless (or (string-equal "" trimmed-title)
+                (string-equal "" trimmed-body))
+      (with-transaction ()
 	(make-instance 'persistent-post :title trimmed-title
-		       :body trimemed-body))))
+		       :body trimmed-body)))))
 
 (define-easy-handler (newpost :uri "/newpost")
     ()
@@ -106,7 +108,7 @@
       (:th "#")
       (:th "Title")
       (:th "Blog Content")
-      (:th "Id")))
+      (:th "id")))
     (:tbody
      (loop for i in list and count from 1 do
        (htm
