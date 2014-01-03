@@ -7,7 +7,7 @@
 
 ;;; set the doctype string at the start of a HTML page to 'html5':
 (setf (html-mode) :html5)
-
+(setf hunchentoot:*show-lisp-errors-p* t)
 ;; two macros to spare myself of repeating *standard-output* nil all
 ;; the time.
 (defmacro with-html (&body body)
@@ -39,7 +39,6 @@
 	 (:script :src "/jquery.js"))
 	(:body ,@body))))
 
-(defvar *id-counter* 0)
 
 (defun get-id ()
   "return a single integer for the current time
@@ -47,7 +46,7 @@
   (get-universal-time))
 
 
-(defparameter *store* (open-store '(:clsql (:sqlite3 "blog.db"))))
+(defvar *store* (open-store '(:clsql (:sqlite3 "blog.db"))))
 
 (defpclass persistent-post ()
   ((title :reader title :initarg :title :index t)
@@ -130,19 +129,20 @@
                    (:a :class "navbar-brand" :href (first i)
                        (str (second i)))))))))
 
-(defparameter *index*
+(defun index-page (posts)
   (with-html
     (page-template (:title "Index")
       (navbar '(("/newpost" "Write a new post")
                 ("/about" "About")))
       (:h3 :class "header" "Watch your posts")
       (:table :class "table table-striped"
-              (str (display-bloglist (blogposts)))))))
+              (str (display-bloglist posts))))))
 
 (define-easy-handler (index :uri "/index")
     ()
    ;; only save blog-post if title
-  *index*)                      ;; and body are non-nil
+  (let ((posts (blogposts)))
+    (index-page posts))) ;; and body are non-nil
 
 (define-easy-handler (addpost :uri "/addpost")
     ((title) (body))
