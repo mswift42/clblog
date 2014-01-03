@@ -69,15 +69,12 @@
 		    (:a :class "navbar-brand" :href "/about" "About")))
 	(:h3 :class "header" "New Posts")
 	(:div :class "form-group"
-	      (:form :method :post :onsubmit (ps-inline
+	      (:form :method :post :onsubmit (ps:ps-inline
 					      (if (or
 						     (= title.value "")
 						     (= body.value ""))
-						(alert "you need body and title")
-						(lisp (add-blog-post
-						       (post-parameter "title")
-						       (post-parameter "body")))))
-                     :action "/index"
+                                                  (alert "you need body and title")))
+                     :action "/addpost"
 		     (:div :class "form-group" "Title"
 			   (:input :type "text" :name "title"
 				   :class "form-control" :label "Title"))
@@ -141,13 +138,29 @@
               (str (display-bloglist (blogposts)))))))
 
 (define-easy-handler (index :uri "/index")
+    ()
+   ;; only save blog-post if title
+  *index*)                      ;; and body are non-nil
+
+(define-easy-handler (addpost :uri "/addpost")
     ((title) (body))
-  (when (and title body)
-    (add-blog-post title body)) ;; only save blog-post if title 
-  *index*)                                         ;; and body are non-nil
+  (add-blog-post title body)
+  (redirect "/index"))
 
 
+(defparameter *about*
+  (with-html
+    (page-template (:title "About")
+      (navbar '(("/newpost" "Write a new post")
+                ("/index" "Read up on the latest posts.")))
+      (:h3 :class "header" "About")
+      (:div :class "about"
+            (:p "A simple implementation of a blog using Common Lisp, ")
+            (:p "Hunchentoot, parenscript, elephant and cl-who.")))))
 
+(define-easy-handler (about :uri "/about")
+    ()
+    *about*)
 
 
 
