@@ -8,11 +8,13 @@ body {
 
 .header {
     color:#121212;
+    margin-top:8px;
+    margin-bottom:8px;
 }
 
-.forms {
-    width:50%;
-    margin:auto;
-}
+/* .forms { */
+/*     width:50%; */
+/*     margin:auto; */
+/* } */
     
 
