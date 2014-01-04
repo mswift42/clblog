@@ -7,7 +7,7 @@
 
 ;;; set the doctype string at the start of a HTML page to 'html5':
 (setf (html-mode) :html5)
-(setf hunchentoot:*show-lisp-errors-p* t)
+
 ;; two macros to spare myself of repeating *standard-output* nil all
 ;; the time.
 (defmacro with-html (&body body)
@@ -85,7 +85,8 @@
 				   :class "btn btn-default")))))))
 
 (defun add-blog-post (title body)
-  "add a new blogpost to db with title and body"
+  "add a new blogpost to db with title and body,
+   but only when title AND body are non empty."
   (let ((trimmed-title (string-trim " " title))
 	(trimmed-body (string-trim " " body)))
     (unless (or (string-equal "" trimmed-title)
@@ -140,9 +141,7 @@
 
 (define-easy-handler (index :uri "/index")
     ()
-   ;; only save blog-post if title
-  (let ((posts (blogposts)))
-    (index-page posts))) ;; and body are non-nil
+   (index-page (blogposts)))
 
 (define-easy-handler (addpost :uri "/addpost")
     ((title) (body))
