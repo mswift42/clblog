@@ -72,7 +72,9 @@
 					      (if (or
 						     (= title.value "")
 						     (= body.value ""))
-                                                  (alert "you need body and title")))
+                                                  (progn
+                                                    (alert "you need body and title")
+                                                    (ps:chain window location (reload true)))))
                      :action "/addpost"
 		     (:div :class "form-group" "Title"
 			   (:input :type "text" :name "title"
