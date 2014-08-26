@@ -1,7 +1,7 @@
-(ql:quickload '(:hunchentoot :cl-who :elephant :parenscript))
+(ql:quickload '(:hunchentoot :cl-who :elephant ))
 
 (defpackage #:clblog
-  (:use :cl :hunchentoot :cl-who :elephant :parenscript))
+  (:use :cl :hunchentoot :cl-who :elephant ))
 
 (in-package #:clblog)
 
@@ -11,7 +11,7 @@
 ;; two macros to spare myself of repeating *standard-output* nil all
 ;; the time.
 (defmacro with-html (&body body)
-    `(with-html-output (*standard-output* nil :prologue t :indent t)
+    `(with-html-output (*standard-output* nil :indent t)
        ,@body))
 
 (defmacro with-html-string (&body body)
@@ -19,11 +19,10 @@
      ,@body))
 
 
-;; tell Hunchentoot which css and js file to use.
+;; tell Hunchentoot which css file to use.
 (push (create-static-file-dispatcher-and-handler
        "/blog.css" "blog.css") *dispatch-table*)
-(push (create-static-file-dispatcher-and-handler
-       "/jquery.js" "jquery-2.0.3.min.js") *dispatch-table*)
+
 
 
 (defmacro page-template ((&key title) &body body)
@@ -34,11 +33,25 @@
 	(:head
 	 (:title ,title)
 	 (:link :type "text/css" :rel "stylesheet"
-                :href "//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css")
-	 (:link :type "text/css" :rel "stylesheet" :href "/blog.css")
-	 (:script :src "/jquery.js"))
+                :href "//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css")
+	 (:link :type "text/css" :rel "stylesheet" :href "/blog.css"))
 	(:body ,@body))))
 
+(defun navbar-header (active)
+  "return bootstrap navbar with active element marked 'active'."
+  (with-html
+    (:nav :class "navbar navbar-inverse navbar-fixed-top" :role "navigation"
+          (:div :class "container"
+                (:div :class "navbar-header"
+                      (:a :class "navbar-brand" :href "#" "Clblog"))
+                (:div :class "navbar navbar-collapse"
+                      (:ul :class "nav navbar-nav"
+                           (dolist (i '(("Home" "/index") ("New Blog Entry" "/newpost")
+                                        ("About" "/about")))
+                             (if (search active (second i))
+                                 (htm (:li :class "active"
+                                           (:a :href (second i) (str (first i)))))
+                                 (htm (:li (:a :href (second i) (str (first i)))))))))))))
 
 (defun get-id ()
   "return a single integer for the current time
@@ -60,31 +73,22 @@
   (nreverse (get-instances-by-range 'persistent-post 'id nil nil)))
 
 (defun newpost-page ()
+  (with-html
     (page-template (:title "New Posts")
-      (htm
-       	(:nav :class "navbar navbar-inverse" :role "navigation"
-	      (:div :class "navbar-header"
-		    (:a :class "navbar-brand" :href "/index" "Index")
-		    (:a :class "navbar-brand" :href "/about" "About")))
-	(:h3 :class "header" "New Posts")
-	(:div :class "form-group"
-	      (:form :method :post :onsubmit (ps:ps-inline
-					      (if (or
-						     (= title.value "")
-						     (= body.value ""))
-                                                  (progn
-                                                    (alert "you need body and title")
-                                                    (ps:chain window location (reload true)))))
-                     :action "/addpost"
-		     (:div :class "form-group" "Title"
-			   (:input :type "text" :name "title"
-				   :class "form-control" :label "Title"))
-		     (:div :class "form-group" "Blog Content"
-			   (:textarea :name "body" :class "form-control"
-				      :label "Content" :rows "20"))
-		     (:div :class "form-group"
-			   (:input :type "submit"   :value "Submit"
-				   :class "btn btn-default")))))))
+      (navbar-header "newpost")
+      (:h3 :class "header" "New Posts")
+      (:div :class "form-group"
+            (:form :method :post 
+                   :action "/addpost"
+                   (:div :class "form-group" "Title"
+                         (:input :type "text" :name "title"
+                                 :class "form-control" :label "Title"))
+                   (:div :class "form-group" "Blog Content"
+                         (:textarea :name "body" :class "form-control"
+                                    :label "Content" :rows "20"))
+                   (:div :class "form-group"
+                         (:input :type "submit"   :value "Submit"
+                                 :class "btn btn-default")))))))
 
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body,
@@ -122,21 +126,13 @@
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
-(defun navbar (links)
-  "return a bootstrap navbar for all links in 'links'"
-  (with-html
-    (:nav :class "navbar navbar-inverse" :role "navigation"
-          (:div :class "navbar-header"
-                (dolist (i links)
-                  (htm
-                   (:a :class "navbar-brand" :href (first i)
-                       (str (second i)))))))))
+
+
 
 (defun index-page (posts)
   (with-html
     (page-template (:title "Index")
-      (navbar '(("/newpost" "Write a new post")
-                ("/about" "About")))
+      (navbar-header "index")
       (:h3 :class "header" "Watch your posts")
       (:table :class "table table-striped"
               (str (display-bloglist posts))))))
@@ -154,12 +150,11 @@
 (defparameter *about*
   (with-html
     (page-template (:title "About")
-      (navbar '(("/newpost" "Write a new post")
-                ("/index" "Read up on the latest posts.")))
+      (navbar-header "about")
       (:h3 :class "header" "About")
-      (:div :class "about"
+      (:div :class "jumbotron"
             (:p "A simple implementation of a blog using Common Lisp, ")
-            (:p "Hunchentoot, parenscript, elephant and cl-who.")))))
+            (:p "Hunchentoot, elephant and cl-who.")))))
 
 (define-easy-handler (about :uri "/about")
     ()
