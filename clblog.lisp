@@ -41,10 +41,10 @@
   "return bootstrap navbar with active element marked 'active'."
   (with-html
     (:nav :class "navbar navbar-inverse navbar-fixed-top" :role "navigation"
-          (:div :class "container"
+          (:div :class "container-fluid"
                 (:div :class "navbar-header"
                       (:a :class "navbar-brand" :href "#" "Clblog"))
-                (:div :class "navbar navbar-collapse"
+                (:div :class "navbar"
                       (:ul :class "nav navbar-nav"
                            (dolist (i '(("Home" "/index") ("New Blog Entry" "/newpost")
                                         ("About" "/about")))
@@ -76,19 +76,20 @@
   (with-html
     (page-template (:title "New Posts")
       (navbar-header "newpost")
-      (:h3 :class "header" "New Posts")
-      (:div :class "form-group"
-            (:form :method :post 
-                   :action "/addpost"
-                   (:div :class "form-group" "Title"
-                         (:input :type "text" :name "title"
-                                 :class "form-control" :label "Title"))
-                   (:div :class "form-group" "Blog Content"
-                         (:textarea :name "body" :class "form-control"
-                                    :label "Content" :rows "20"))
-                   (:div :class "form-group"
-                         (:input :type "submit"   :value "Submit"
-                                 :class "btn btn-default")))))))
+      (:div :class "container"
+            (:h3 :class "header" "New Posts")
+            (:div :class "form-group"
+                  (:form :method :post 
+                         :action "/addpost"
+                         (:div :class "form-group" "Title"
+                               (:input :type "text" :name "title"
+                                       :class "form-control" :label "Title"))
+                         (:div :class "form-group" "Blog Content"
+                               (:textarea :name "body" :class "form-control"
+                                          :label "Content" :rows "20"))
+                         (:div :class "form-group"
+                               (:input :type "submit"   :value "Submit"
+                                       :class "btn btn-default"))))))))
 
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body,
@@ -133,9 +134,10 @@
   (with-html
     (page-template (:title "Index")
       (navbar-header "index")
-      (:h3 :class "header" "Watch your posts")
-      (:table :class "table table-striped"
-              (str (display-bloglist posts))))))
+      (:div :class "container"
+            (:h3 :class "header" "Watch your posts")
+            (:table :class "table table-striped"
+                    (str (display-bloglist posts)))))))
 
 (define-easy-handler (index :uri "/index")
     ()
@@ -151,10 +153,11 @@
   (with-html
     (page-template (:title "About")
       (navbar-header "about")
-      (:h3 :class "header" "About")
-      (:div :class "jumbotron"
-            (:p "A simple implementation of a blog using Common Lisp, ")
-            (:p "Hunchentoot, elephant and cl-who.")))))
+      (:div :class "container"
+           (:h3 :class "header" "About")
+           (:div :class "jumbotron"
+                 (:p "A simple implementation of a blog using Common Lisp, ")
+                 (:p "Hunchentoot, elephant and cl-who."))))))
 
 (define-easy-handler (about :uri "/about")
     ()

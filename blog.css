@@ -1,22 +1,29 @@
 /* css file for clblog.lisp */
 
 body {
-    padding-top:75px;
+    padding-top:70px;
     background-color:#efece3;
 }
 
 .header {
     color:#121212;
-    margin-top:8px;
-    margin-bottom:8px;
+    margin-top:1.8em;
+    margin-bottom:1.8em;
     text-align:center;
 }
 .jumbotron {
-    background-color:oldlace;
-
+    background-color: #bebebe;
+}
+.container {
+    width:900px;
+}
 /* .forms { */
 /*     width:50%; */
 /*     margin:auto; */
 /* } */
-    
-
+.navbar-brand,
+.navbar-nav li a {
+    line-height: 40px;
+    height: 40px;
+    padding-top: 0;
+}
