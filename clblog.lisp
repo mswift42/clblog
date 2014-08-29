@@ -40,7 +40,7 @@
 (defun navbar-header (active)
   "return bootstrap navbar with active element marked 'active'."
   (with-html
-    (:nav :class "navbar navbar-inverse navbar-fixed-top" :role "navigation"
+    (:nav :class "navbar navbar-fixed-top" :role "navigation"
           (:div :class "container-fluid"
                 (:div :class "navbar-header"
                       (:a :class "navbar-brand" :href "#" "Clblog"))
@@ -106,24 +106,22 @@
     ()
   (newpost-page))
 
-(defun display-bloglist (list)
-  "iterate through list of stored blogpost instances and 
-   display them."
+
+
+(defun display-blog-entries (entries)
+  "html to display for all blog entries."
   (with-html-string
-    (:thead
-     (:tr
-      (:th "#")
-      (:th "Title")
-      (:th "Blog Content")
-      (:th "id")))
-    (:tbody
-     (loop for i in list and count from 1 do
-       (htm
-        (:tr
-         (:th (str count))
-         (:th (str (title i)))
-         (:th (str (body i)))
-         (:th (str (id i)))))))))
+    (:div :class "entires"
+          (:div :class "entry"
+                (loop for i in entries do
+                     (htm
+                      (:div :class "singleentry"
+                            (:div :class "posttitle"
+                                  (:p (str (title i))))
+                            (:div :class "postbody"
+                                  (:p (str (body i))))
+                            (:div :class "postid"
+                                  (:p (str (id i)))))))))))
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
@@ -136,8 +134,7 @@
       (navbar-header "index")
       (:div :class "container"
             (:h3 :class "header" "Watch your posts")
-            (:table :class "table table-striped"
-                    (str (display-bloglist posts)))))))
+            (str (display-blog-entries posts))))))
 
 (define-easy-handler (index :uri "/index")
     ()
