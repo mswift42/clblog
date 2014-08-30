@@ -107,11 +107,10 @@
   (newpost-page))
 
 
-
 (defun display-blog-entries (entries)
   "html to display for all blog entries."
   (with-html-string
-    (:div :class "entires"
+    (:div :class "entries"
           (:div :class "entry"
                 (loop for i in entries do
                      (htm
@@ -121,7 +120,9 @@
                             (:div :class "postbody"
                                   (:p (str (body i))))
                             (:div :class "postid"
-                                  (:p (str (id i)))))))))))
+                                  (:form :method "post" :action "/editpost"
+                                         (:input :type "hidden" :value (str (id i)) :name "entryid")
+                                         (:input :type "submit" :class "btn" :value "Edit Blog Entry"))))))))))
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
