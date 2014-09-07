@@ -37,6 +37,7 @@
 	 (:link :type "text/css" :rel "stylesheet" :href "/blog.css"))
 	(:body ,@body))))
 
+
 (defun navbar-header (active)
   "return bootstrap navbar with active element marked 'active'."
   (with-html
@@ -68,9 +69,32 @@
   (:documentation "each blogpost with id, title and body
         is an instance of the Elephant persistent class"))
 
+
+
 (defun blogposts ()
   "return the stored blogposts"
   (nreverse (get-instances-by-range 'persistent-post 'id nil nil)))
+
+(defun single-blog-entry (id)
+  "return the stored blogpost belonging to Id id"
+  (get-instance-by-value 'persistent-post 'id id))
+
+(defun blog-post-form (target title content)
+  "generate html for the form used in saving and editing a form."
+  (with-html
+    (:form :method :post
+           :action target
+           (:div :class "form-group" "Blog Title"
+                 (:input :type "text" :name "title"
+                         :class "form-control" :label "Title"
+                         :value title))
+           (:div :class "form-group" "Content"
+                 (:textarea :name "body" :class "form-control"
+                            :label "Content" :rows "20"
+                            :value content))
+           (:div :class "form-group"
+                 (:input :type "submit" :value "Submit"
+                         :class "btn btn-default")))))
 
 (defun newpost-page ()
   (with-html
@@ -78,18 +102,7 @@
       (navbar-header "newpost")
       (:div :class "container"
             (:h3 :class "header" "New Posts")
-            (:div :class "form-group"
-                  (:form :method :post 
-                         :action "/addpost"
-                         (:div :class "form-group" "Title"
-                               (:input :type "text" :name "title"
-                                       :class "form-control" :label "Title"))
-                         (:div :class "form-group" "Blog Content"
-                               (:textarea :name "body" :class "form-control"
-                                          :label "Content" :rows "20"))
-                         (:div :class "form-group"
-                               (:input :type "submit"   :value "Submit"
-                                       :class "btn btn-default"))))))))
+            (blog-post-form "/addpost" "" "")))))
 
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body,
@@ -101,6 +114,12 @@
       (with-transaction ()
 	(make-instance 'persistent-post :title trimmed-title
 		       :body trimmed-body)))))
+
+(defvar *blog-posts*
+  (or (get-from-root "blog-posts")
+      (let ((blog-posts (make-pset)))
+        (add-to-root "blog-posts" blog-posts)
+        blog-posts)))
 
 (define-easy-handler (newpost :uri "/newpost")
     ()
@@ -146,6 +165,19 @@
   (add-blog-post title body)
   (redirect "/index"))
 
+(define-easy-handler (editpost :uri "/editpost")
+    (entryid)
+  (edit-blog-post entryid))
+
+(defun edit-blog-post (id)
+  "fetch blogentry with id from elephant store"
+  (let ((post (single-blog-entry (parse-integer id))))
+    (with-html
+      (page-template (:title "Edit Posts")
+        (navbar-header "")
+        (:div :class "container"
+              (:h3 :class "header" "Edit Posts")
+              (blog-post-form "/saveedit" (title post) (body post)))))))
 
 (defparameter *about*
   (with-html
