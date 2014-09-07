@@ -69,6 +69,12 @@
   (:documentation "each blogpost with id, title and body
         is an instance of the Elephant persistent class"))
 
+(defmethod (setf title) (nt (p persistent-post))
+  (setf (slot-value p 'title) nt))
+
+(defmethod (setf body) (nb (p persistent-post))
+  (setf (slot-value p 'body) nb))
+
 
 
 (defun blogposts ()
@@ -79,7 +85,8 @@
   "return the stored blogpost belonging to Id id"
   (get-instance-by-value 'persistent-post 'id id))
 
-(defun blog-post-form (target title content)
+
+(defun blog-post-form (target title content id)
   "generate html for the form used in saving and editing a form."
   (with-html
     (:form :method :post
@@ -93,6 +100,7 @@
                             :label "Content" :rows "20"
                             :value content))
            (:div :class "form-group"
+                 (:input :type "hidden" :name "id" :value id)
                  (:input :type "submit" :value "Submit"
                          :class "btn btn-default")))))
 
@@ -102,7 +110,7 @@
       (navbar-header "newpost")
       (:div :class "container"
             (:h3 :class "header" "New Posts")
-            (blog-post-form "/addpost" "" "")))))
+            (blog-post-form "/addpost" "" "" "")))))
 
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body,
@@ -114,6 +122,8 @@
       (with-transaction ()
 	(make-instance 'persistent-post :title trimmed-title
 		       :body trimmed-body)))))
+
+
 
 (defvar *blog-posts*
   (or (get-from-root "blog-posts")
@@ -177,7 +187,17 @@
         (navbar-header "")
         (:div :class "container"
               (:h3 :class "header" "Edit Posts")
-              (blog-post-form "/saveedit" (title post) (body post)))))))
+              (blog-post-form "/saveedit" (title post) (body post) id))))))
+
+(define-easy-handler (saveedit :uri "/saveedit")
+    ((title) (body)  (id))
+  (edit-post id title body)
+  (redirect "/index"))
+
+(defun edit-post (id title body)
+  (let ((post (single-blog-entry (parse-integer id))))
+    (setf (title post) title)
+    (setf (body post) body)))
 
 (defparameter *about*
   (with-html
