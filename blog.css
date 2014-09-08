@@ -17,6 +17,45 @@ body {
 .container {
     width:900px;
 }
+.entries {
+    width:880px;
+    display:table;
+
+}
+.entry {
+    width:880px;
+    text-align:center;
+}
+.singleentry {
+    margin-left:auto;
+    margin-right:auto;
+}
+.posttitle {
+    height:30px;
+    line-height:24px;
+    margin:auto;
+    padding:2px;
+    width:300px;
+    background-color:white;
+    border-color:#bdbdbd;
+    border-style:solid;
+    border-width:1px;
+    border-radius:4px;
+}
+.form-group {
+    padding:5px;
+    margin-bottom:4px;
+}
+input.btn {
+    padding:6px 12px;
+    margin-top:8px;
+    margin-bottom:8px;
+
+}
+.btn.btn-danger {
+    margin-left:718px;
+}
+
 /* .forms { */
 /*     width:50%; */
 /*     margin:auto; */

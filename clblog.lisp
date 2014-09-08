@@ -86,23 +86,24 @@
   (get-instance-by-value 'persistent-post 'id id))
 
 
-(defun blog-post-form (target title content id)
+(defmacro blog-post-form (target title content id &rest delete)
   "generate html for the form used in saving and editing a form."
-  (with-html
+  `(with-html
     (:form :method :post
-           :action target
+           :action ,target
            (:div :class "form-group" "Blog Title"
                  (:input :type "text" :name "title"
                          :class "form-control" :label "Title"
-                         :value title))
+                         :value ,title))
            (:div :class "form-group" "Content"
                  (:textarea :name "body" :class "form-control"
                             :label "Content" :rows "20"
-                            :value content))
+                            :value ,content))
            (:div :class "form-group"
-                 (:input :type "hidden" :name "id" :value id)
-                 (:input :type "submit" :value "Submit"
-                         :class "btn btn-default")))))
+                 (:input :type "hidden" :name "id" :value ,id)
+                 (:input :type "submit" :value "Submit" :name "blogidbutton"
+                         :class "btn btn-default")
+                 ,@delete))))
 
 (defun newpost-page ()
   (with-html
@@ -110,7 +111,7 @@
       (navbar-header "newpost")
       (:div :class "container"
             (:h3 :class "header" "New Posts")
-            (blog-post-form "/addpost" "" "" "")))))
+            (blog-post-form "/addpost" "" "" "" )))))
 
 (defun add-blog-post (title body)
   "add a new blogpost to db with title and body,
@@ -151,7 +152,7 @@
                             (:div :class "postid"
                                   (:form :method "post" :action "/editpost"
                                          (:input :type "hidden" :value (str (id i)) :name "entryid")
-                                         (:input :type "submit" :class "btn" :value "Edit Blog Entry"))))))))))
+                                         (:input :type "submit" :class "btn btn-default" :value "Edit Blog Entry"))))))))))
 
 (defvar *web-server* (make-instance 'easy-acceptor :port 4242))
 
@@ -163,7 +164,7 @@
     (page-template (:title "Index")
       (navbar-header "index")
       (:div :class "container"
-            (:h3 :class "header" "Watch your posts")
+            (:h3 :class "header" "Blog Posts")
             (str (display-blog-entries posts))))))
 
 (define-easy-handler (index :uri "/index")
@@ -180,24 +181,34 @@
   (edit-blog-post entryid))
 
 (defun edit-blog-post (id)
-  "fetch blogentry with id from elephant store"
+  "lookup blog-post entry with 'id' id and display form html with its
+   contents."
   (let ((post (single-blog-entry (parse-integer id))))
     (with-html
       (page-template (:title "Edit Posts")
         (navbar-header "")
         (:div :class "container"
               (:h3 :class "header" "Edit Posts")
-              (blog-post-form "/saveedit" (title post) (body post) id))))))
+              (blog-post-form "/saveedit" (title post) (body post) id
+                              (htm (:button :class "btn btn-danger" :name "blogidbutton" :value "Delete" "Delete"))))))))
 
 (define-easy-handler (saveedit :uri "/saveedit")
     ((title) (body)  (id))
-  (edit-post id title body)
+  (if (string-equal "Submit" (post-parameter "blogidbutton"))
+      (edit-post id title body)
+      (delete-post id))
   (redirect "/index"))
 
 (defun edit-post (id title body)
   (let ((post (single-blog-entry (parse-integer id))))
     (setf (title post) title)
     (setf (body post) body)))
+
+(defun delete-post (id)
+  "Delete blogpost with 'id' id"
+  (let ((post (single-blog-entry (parse-integer id))))
+    (with-transaction ()
+      (remove-from-root post))))
 
 (defparameter *about*
   (with-html
