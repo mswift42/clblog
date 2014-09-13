@@ -69,11 +69,11 @@
   (:documentation "each blogpost with id, title and body
         is an instance of the Elephant persistent class"))
 
-(defmethod (setf title) (nt (p persistent-post))
-  (setf (slot-value p 'title) nt))
+(defmethod (setf title) (nt (b persistent-post))
+  (setf (slot-value b 'title) nt))
 
-(defmethod (setf body) (nb (p persistent-post))
-  (setf (slot-value p 'body) nb))
+(defmethod (setf body) (nb (b persistent-post))
+  (setf (slot-value b 'body) nb))
 
 
 
@@ -86,8 +86,10 @@
   (get-instance-by-value 'persistent-post 'id id))
 
 
-(defmacro blog-post-form (target title content id &rest delete)
-  "generate html for the form used in saving and editing a form."
+(defmacro persistent-post-form (target title content id &rest delete)
+  "generate html for the form used in saving and editing a form.
+   delete is needed only for editing a blogpost, thus using it as
+   an optional argument."
   `(with-html
     (:form :method :post
            :action ,target
@@ -111,9 +113,9 @@
       (navbar-header "newpost")
       (:div :class "container"
             (:h3 :class "header" "New Posts")
-            (blog-post-form "/addpost" "" "" "" )))))
+            (persistent-post-form "/addpost" "" "" "" )))))
 
-(defun add-blog-post (title body)
+(defun add-persistent-post (title body)
   "add a new blogpost to db with title and body,
    but only when title AND body are non empty."
   (let ((trimmed-title (string-trim " " title))
@@ -121,16 +123,21 @@
     (unless (or (string-equal "" trimmed-title)
                 (string-equal "" trimmed-body))
       (with-transaction ()
-	(make-instance 'persistent-post :title trimmed-title
-		       :body trimmed-body)))))
+        (make-instance 'persistent-post :title trimmed-title
+                       :body trimmed-body)))))
+
+(defun remove-persistent-post (id)
+  "remove a blogpost with 'id' id"
+  (let ((post (single-blog-entry (parse-integer id))))
+    (with-transaction ()
+      (remove-item post *persistent-posts*))))
 
 
-
-(defvar *blog-posts*
-  (or (get-from-root "blog-posts")
-      (let ((blog-posts (make-pset)))
-        (add-to-root "blog-posts" blog-posts)
-        blog-posts)))
+(defvar *persistent-posts*
+  (or (get-from-root "persistent-posts")
+      (let ((persistent-posts (make-pset)))
+        (add-to-root "persistent-posts" persistent-posts)
+        persistent-posts)))
 
 (define-easy-handler (newpost :uri "/newpost")
     ()
@@ -173,15 +180,15 @@
 
 (define-easy-handler (addpost :uri "/addpost")
     ((title) (body))
-  (add-blog-post title body)
+  (add-persistent-post title body)
   (redirect "/index"))
 
 (define-easy-handler (editpost :uri "/editpost")
     (entryid)
-  (edit-blog-post entryid))
+  (edit-persistent-post entryid))
 
-(defun edit-blog-post (id)
-  "lookup blog-post entry with 'id' id and display form html with its
+(defun edit-persistent-post (id)
+  "lookup persistent-post entry with 'id' id and display form html with its
    contents."
   (let ((post (single-blog-entry (parse-integer id))))
     (with-html
@@ -189,14 +196,14 @@
         (navbar-header "")
         (:div :class "container"
               (:h3 :class "header" "Edit Posts")
-              (blog-post-form "/saveedit" (title post) (body post) id
+              (persistent-post-form "/saveedit" (title post) (body post) id
                               (htm (:button :class "btn btn-danger" :name "blogidbutton" :value "Delete" "Delete"))))))))
 
 (define-easy-handler (saveedit :uri "/saveedit")
     ((title) (body)  (id))
   (if (string-equal "Submit" (post-parameter "blogidbutton"))
       (edit-post id title body)
-      (delete-post id))
+      (remove-persistent-post id))
   (redirect "/index"))
 
 (defun edit-post (id title body)
